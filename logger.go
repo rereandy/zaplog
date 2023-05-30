@@ -24,14 +24,13 @@ func Init(config Config) error {
 	}
 
 	// 创建日志子目录
-	date := time.Now().Format("2006-01-02")
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.InfoDirectoryName+"-"+date), os.ModePerm); err != nil {
+	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.InfoDirectoryName), os.ModePerm); err != nil {
 		return fmt.Errorf("error creating info directory, err: %v", err)
 	}
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.WarnDirectoryName+"-"+date), os.ModePerm); err != nil {
+	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.WarnDirectoryName), os.ModePerm); err != nil {
 		return fmt.Errorf("error creating warn directory, err: %v", err)
 	}
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.ErrorDirectoryName+"-"+date), os.ModePerm); err != nil {
+	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.ErrorDirectoryName), os.ModePerm); err != nil {
 		return fmt.Errorf("error creating err directory, err: %v", err)
 	}
 
@@ -56,9 +55,9 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.
 func initLogger(c Config) {
 	// 获取io.Writer实现
 	date := time.Now().Format("2006-01-02")
-	infoWriter := getWriter(c.BaseDirectoryName, c.InfoDirectoryName, c.InfoFileName+"-"+date, c)
-	warnWriter := getWriter(c.BaseDirectoryName, c.WarnDirectoryName, c.WarnFileName+"-"+date, c)
-	errWriter := getWriter(c.BaseDirectoryName, c.ErrorDirectoryName, c.ErrorFileName+"-"+date, c)
+	infoWriter := getWriter(c.BaseDirectoryName, c.InfoDirectoryName, c.InfoFileName+"-"+date+".log", c)
+	warnWriter := getWriter(c.BaseDirectoryName, c.WarnDirectoryName, c.WarnFileName+"-"+date+".log", c)
+	errWriter := getWriter(c.BaseDirectoryName, c.ErrorDirectoryName, c.ErrorFileName+"-"+date+".log", c)
 
 	// 获取日志默认配置
 	encoderConfig := zap.NewProductionEncoderConfig()
