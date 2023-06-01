@@ -53,7 +53,6 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.
 		MaxAge:     config.LogFileMaxAge,
 		Compress:   config.LogFileCompress,
 	}*/
-
 	filename := fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName)
 	hook, err := rotatelogs.New(
 		filename+".%Y%m%d%H", // 没有使用go风格反人类的format格式
@@ -61,12 +60,13 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.
 		rotatelogs.WithMaxAge(time.Duration(config.LogFileMaxAge)*24*7),
 		rotatelogs.WithRotationTime(time.Hour),
 		rotatelogs.WithRotationSize(int64(config.LogFileMaxSize)),
+		rotatelogs.ForceNewFile(),
 	)
 
 	if err != nil {
 		panic(err)
 	}
-	return hook
+	return zapcore.AddSync(hook)
 }
 
 // initLog 初始化日志
