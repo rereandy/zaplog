@@ -48,9 +48,8 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) zap
 	hook, err := rotatelogs.New(
 		filename+".%Y%m%d%H",
 		rotatelogs.WithLinkName(filename),
-		rotatelogs.WithMaxAge(time.Duration(config.LogFileMaxAge)*24*7),
+		rotatelogs.WithMaxAge(time.Hour*24*7),
 		rotatelogs.WithRotationTime(time.Hour),
-		rotatelogs.WithRotationSize(int64(config.LogFileMaxSize)),
 	)
 
 	if err != nil {
@@ -114,5 +113,5 @@ func initLogger(c Config) {
 		zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
 		zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
 	)
-	Log = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	Log = zap.New(core, zap.AddCaller())
 }
