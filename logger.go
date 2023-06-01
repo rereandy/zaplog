@@ -2,7 +2,6 @@ package log
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -15,7 +14,7 @@ var Log *zap.Logger
 
 // Init 初始化日志相关目录
 func Init(config Config) error {
-	// 创建日志根目录
+	/*// 创建日志根目录
 	if _, err := os.Stat(config.BaseDirectoryName); os.IsNotExist(err) {
 		err := os.MkdirAll(config.BaseDirectoryName, os.ModePerm)
 		if err != nil {
@@ -35,7 +34,7 @@ func Init(config Config) error {
 	}
 	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.ErrorDirectoryName), os.ModePerm); err != nil {
 		return fmt.Errorf("error creating err directory, err: %v", err)
-	}
+	}*/
 
 	// 自定义初始化zap库
 	initLogger(config)
