@@ -14,31 +14,8 @@ var Log *zap.Logger
 
 // Init 初始化日志相关目录
 func Init(config Config) error {
-	/*// 创建日志根目录
-	if _, err := os.Stat(config.BaseDirectoryName); os.IsNotExist(err) {
-		err := os.MkdirAll(config.BaseDirectoryName, os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("error creating directory, err: %v", err)
-		}
-	}
-
-	// 创建日志子目录
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.DebugDirectoryName), os.ModePerm); err != nil {
-		return fmt.Errorf("error creating debug directory, err: %v", err)
-	}
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.InfoDirectoryName), os.ModePerm); err != nil {
-		return fmt.Errorf("error creating info directory, err: %v", err)
-	}
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.WarnDirectoryName), os.ModePerm); err != nil {
-		return fmt.Errorf("error creating warn directory, err: %v", err)
-	}
-	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.ErrorDirectoryName), os.ModePerm); err != nil {
-		return fmt.Errorf("error creating err directory, err: %v", err)
-	}*/
-
 	// 自定义初始化zap库
 	initLogger(config)
-
 	return nil
 }
 
@@ -113,5 +90,5 @@ func initLogger(c Config) {
 		zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
 		zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
 	)
-	Log = zap.New(core, zap.AddCaller())
+	Log = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
