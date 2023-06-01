@@ -56,7 +56,7 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.
 
 	filename := fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName)
 	hook, err := rotatelogs.New(
-		filename, // 没有使用go风格反人类的format格式
+		filename+".%Y%m%d%H", // 没有使用go风格反人类的format格式
 		rotatelogs.WithLinkName(filename),
 		rotatelogs.WithMaxAge(time.Duration(config.LogFileMaxAge)*24*7),
 		rotatelogs.WithRotationTime(time.Hour),
