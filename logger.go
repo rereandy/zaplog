@@ -45,13 +45,6 @@ func Init(config Config) error {
 
 // getWriter 获取wirter文件写入
 func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) zapcore.WriteSyncer {
-	/*return &Logger{
-		Filename:   fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName),
-		MaxBackups: config.LogFileMaxBackups,
-		MaxSize:    config.LogFileMaxSize,
-		MaxAge:     config.LogFileMaxAge,
-		Compress:   config.LogFileCompress,
-	}*/
 	filename := fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName)
 	hook, err := rotatelogs.New(
 		filename+".%Y%m%d%H",
@@ -59,7 +52,6 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) zap
 		rotatelogs.WithMaxAge(time.Duration(config.LogFileMaxAge)*24*7),
 		rotatelogs.WithRotationTime(time.Hour),
 		rotatelogs.WithRotationSize(int64(config.LogFileMaxSize)),
-		rotatelogs.ForceNewFile(),
 	)
 
 	if err != nil {
@@ -117,24 +109,11 @@ func initLogger(c Config) {
 
 	// 日志文件输出位置
 	var core zapcore.Core
-	if c.LogPrintTag {
-		//同时在文件和终端输出日志
-		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, debugWriter, debugLevel), // debug级别日志
-			zapcore.NewCore(encoder, infoWriter, infoLevel),   // info级别日志
-			zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
-			zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
-			zapcore.NewCore(encoder, zapcore.Lock(os.Stdout), zap.DebugLevel),
-		)
-	} else {
-		//只在文件输出日志
-		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, debugWriter, debugLevel), // debug级别日志
-			zapcore.NewCore(encoder, infoWriter, infoLevel),   // info级别日志
-			zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
-			zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
-		)
-	}
-
+	core = zapcore.NewTee(
+		zapcore.NewCore(encoder, debugWriter, debugLevel), // debug级别日志
+		zapcore.NewCore(encoder, infoWriter, infoLevel),   // info级别日志
+		zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
+		zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
+	)
 	Log = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
