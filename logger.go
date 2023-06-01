@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -24,6 +25,9 @@ func Init(config Config) error {
 	}
 
 	// 创建日志子目录
+	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.DebugDirectoryName), os.ModePerm); err != nil {
+		return fmt.Errorf("error creating debug directory, err: %v", err)
+	}
 	if err := os.MkdirAll(fmt.Sprintf("%s/%s", config.BaseDirectoryName, config.InfoDirectoryName), os.ModePerm); err != nil {
 		return fmt.Errorf("error creating info directory, err: %v", err)
 	}
@@ -42,22 +46,36 @@ func Init(config Config) error {
 
 // getWriter 获取wirter文件写入
 func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.Writer {
-	return &Logger{
+	/*return &Logger{
 		Filename:   fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName),
 		MaxBackups: config.LogFileMaxBackups,
 		MaxSize:    config.LogFileMaxSize,
 		MaxAge:     config.LogFileMaxAge,
 		Compress:   config.LogFileCompress,
+	}*/
+
+	filename := fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName)
+	hook, err := rotatelogs.New(
+		filename, // 没有使用go风格反人类的format格式
+		rotatelogs.WithLinkName(filename),
+		rotatelogs.WithMaxAge(time.Duration(config.LogFileMaxAge)*24*7),
+		rotatelogs.WithRotationTime(time.Hour),
+		rotatelogs.WithRotationSize(int64(config.LogFileMaxSize)),
+	)
+
+	if err != nil {
+		panic(err)
 	}
+	return hook
 }
 
 // initLog 初始化日志
 func initLogger(c Config) {
 	// 获取io.Writer实现
-	date := time.Now().Format("2006-01-02")
-	infoWriter := getWriter(c.BaseDirectoryName, c.InfoDirectoryName, c.InfoFileName+"-"+date+".log", c)
-	warnWriter := getWriter(c.BaseDirectoryName, c.WarnDirectoryName, c.WarnFileName+"-"+date+".log", c)
-	errWriter := getWriter(c.BaseDirectoryName, c.ErrorDirectoryName, c.ErrorFileName+"-"+date+".log", c)
+	debugWriter := getWriter(c.BaseDirectoryName, c.DebugDirectoryName, c.DebugFileName, c)
+	infoWriter := getWriter(c.BaseDirectoryName, c.InfoDirectoryName, c.InfoFileName, c)
+	warnWriter := getWriter(c.BaseDirectoryName, c.WarnDirectoryName, c.WarnFileName, c)
+	errWriter := getWriter(c.BaseDirectoryName, c.ErrorDirectoryName, c.ErrorFileName, c)
 
 	// 获取日志默认配置
 	encoderConfig := zap.NewProductionEncoderConfig()
@@ -83,8 +101,11 @@ func initLogger(c Config) {
 	encoder := zapcore.NewJSONEncoder(encoderConfig)
 
 	// 自定义日志级别 info
+	debugLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl <= zap.DebugLevel
+	})
 	infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl <= zap.InfoLevel && lvl >= zap.DebugLevel
+		return lvl <= zap.InfoLevel && lvl > zap.DebugLevel
 	})
 	// 自定义日志级别 warn
 	warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
@@ -100,17 +121,19 @@ func initLogger(c Config) {
 	if c.LogPrintTag {
 		//同时在文件和终端输出日志
 		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel), // info级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(warnWriter), warnLevel), // warn级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(errWriter), errLevel),   // error级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(debugWriter), debugLevel), // debug级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel),   // info级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(warnWriter), warnLevel),   // warn级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(errWriter), errLevel),     // error级别日志
 			zapcore.NewCore(encoder, zapcore.Lock(os.Stdout), zap.DebugLevel),
 		)
 	} else {
 		//只在文件输出日志
 		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel), // info级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(warnWriter), warnLevel), // warn级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(errWriter), errLevel),   // error级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(debugWriter), debugLevel), // debug级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel),   // info级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(warnWriter), warnLevel),   // warn级别日志
+			zapcore.NewCore(encoder, zapcore.AddSync(errWriter), errLevel),     // error级别日志
 		)
 	}
 

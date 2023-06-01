@@ -17,6 +17,11 @@ func init() {
 封装相关方法后续通过包名直接调用
 */
 
+// Debugf func
+func Debugf(msg string, fields ...zap.Field) {
+	Log.Debug(msg, fields...)
+}
+
 // Infof info func
 func Infof(msg string, fields ...zap.Field) {
 	Log.Info(msg, fields...)

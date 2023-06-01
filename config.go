@@ -2,27 +2,31 @@ package log
 
 // 定义默认的常量
 const (
-	defaultBaseDirectoryName  = "logs"  // 日志根目录
-	defaultInfoDirectoryName  = "info"  // info日志目录
-	defaultWarnDirectoryName  = "warn"  // warn日志目录
-	defaultErrorDirectoryName = "error" // error日志目录
-	defaultInfoFileName       = "info"  // info日志文件
-	defaultWarnFileName       = "warn"  // warn日志文件
-	defaultErrorFileName      = "error" // error日志文件
-	defaultLogFileMaxSize     = 128     // 日志文件大小，单位：MB
-	defaultLogFileMaxBackups  = 180     // 日志文件保留个数 多于180个文件后，清理比价旧的日志
-	defaultLogFileMaxAge      = 1       // 日志文件一天一切隔
-	defaultLogFileCompress    = false   // 日志文件是否压缩
-	defaultLogPrintTag        = false   // true:在终端和文件同时输出日志; false:只在文件输出日志
+	defaultBaseDirectoryName  = "logs"      // 日志根目录
+	defaultDebugDirectoryName = "debug"     // info日志目录
+	defaultInfoDirectoryName  = "info"      // info日志目录
+	defaultWarnDirectoryName  = "warn"      // warn日志目录
+	defaultErrorDirectoryName = "error"     // error日志目录
+	defaultDebugFileName      = "debug.log" // info日志文件
+	defaultInfoFileName       = "info.log"  // info日志文件
+	defaultWarnFileName       = "warn.log"  // warn日志文件
+	defaultErrorFileName      = "error.log" // error日志文件
+	defaultLogFileMaxSize     = 128         // 日志文件大小，单位：MB
+	defaultLogFileMaxBackups  = 180         // 日志文件保留个数 多于180个文件后，清理比价旧的日志
+	defaultLogFileMaxAge      = 1           // 日志文件一天一切隔
+	defaultLogFileCompress    = false       // 日志文件是否压缩
+	defaultLogPrintTag        = false       // true:在终端和文件同时输出日志; false:只在文件输出日志
 
 )
 
 // Config 配置文件结构体
 type Config struct {
 	BaseDirectoryName  string
+	DebugDirectoryName string
 	InfoDirectoryName  string
 	WarnDirectoryName  string
 	ErrorDirectoryName string
+	DebugFileName      string
 	InfoFileName       string
 	WarnFileName       string
 	ErrorFileName      string
@@ -125,9 +129,11 @@ func NewConfig(opts ...Option) Config {
 	// 初始化默认值
 	defaultConfig := Config{
 		BaseDirectoryName:  defaultBaseDirectoryName,
+		DebugDirectoryName: defaultDebugDirectoryName,
 		InfoDirectoryName:  defaultInfoDirectoryName,
 		WarnDirectoryName:  defaultWarnDirectoryName,
 		ErrorDirectoryName: defaultErrorDirectoryName,
+		DebugFileName:      defaultDebugFileName,
 		InfoFileName:       defaultInfoFileName,
 		WarnFileName:       defaultWarnFileName,
 		ErrorFileName:      defaultErrorFileName,
