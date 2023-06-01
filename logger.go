@@ -2,7 +2,6 @@ package log
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"time"
 
@@ -45,7 +44,7 @@ func Init(config Config) error {
 }
 
 // getWriter 获取wirter文件写入
-func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.Writer {
+func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) zapcore.WriteSyncer {
 	/*return &Logger{
 		Filename:   fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName),
 		MaxBackups: config.LogFileMaxBackups,
@@ -55,7 +54,7 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) io.
 	}*/
 	filename := fmt.Sprintf("%s/%s/%s", logBasePath, logLevelPath, LogFileName)
 	hook, err := rotatelogs.New(
-		filename+".%Y%m%d%H", // 没有使用go风格反人类的format格式
+		filename+".%Y%m%d%H",
 		rotatelogs.WithLinkName(filename),
 		rotatelogs.WithMaxAge(time.Duration(config.LogFileMaxAge)*24*7),
 		rotatelogs.WithRotationTime(time.Hour),
@@ -121,19 +120,19 @@ func initLogger(c Config) {
 	if c.LogPrintTag {
 		//同时在文件和终端输出日志
 		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, zapcore.AddSync(debugWriter), debugLevel), // debug级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel),   // info级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(warnWriter), warnLevel),   // warn级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(errWriter), errLevel),     // error级别日志
+			zapcore.NewCore(encoder, debugWriter, debugLevel), // debug级别日志
+			zapcore.NewCore(encoder, infoWriter, infoLevel),   // info级别日志
+			zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
+			zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
 			zapcore.NewCore(encoder, zapcore.Lock(os.Stdout), zap.DebugLevel),
 		)
 	} else {
 		//只在文件输出日志
 		core = zapcore.NewTee(
-			zapcore.NewCore(encoder, zapcore.AddSync(debugWriter), debugLevel), // debug级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel),   // info级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(warnWriter), warnLevel),   // warn级别日志
-			zapcore.NewCore(encoder, zapcore.AddSync(errWriter), errLevel),     // error级别日志
+			zapcore.NewCore(encoder, debugWriter, debugLevel), // debug级别日志
+			zapcore.NewCore(encoder, infoWriter, infoLevel),   // info级别日志
+			zapcore.NewCore(encoder, warnWriter, warnLevel),   // warn级别日志
+			zapcore.NewCore(encoder, errWriter, errLevel),     // error级别日志
 		)
 	}
 
