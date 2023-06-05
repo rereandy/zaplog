@@ -16,7 +16,7 @@ const (
 	defaultLogFileMaxAge      = 1           // 日志文件一天一切隔
 	defaultLogFileCompress    = false       // 日志文件是否压缩
 	defaultLogPrintTag        = false       // true:在终端和文件同时输出日志; false:只在文件输出日志
-
+	defaultHourOfDay          = 24 * 7      // 日志保留时长
 )
 
 // Config 配置文件结构体

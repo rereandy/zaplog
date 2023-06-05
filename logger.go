@@ -25,7 +25,7 @@ func getWriter(logBasePath, logLevelPath, LogFileName string, config Config) zap
 	hook, err := rotatelogs.New(
 		filename+".%Y%m%d%H",
 		rotatelogs.WithLinkName(filename),
-		rotatelogs.WithMaxAge(time.Hour*24*7),
+		rotatelogs.WithMaxAge(time.Hour*defaultHourOfDay),
 		rotatelogs.WithRotationTime(time.Hour),
 	)
 
